@@ -93,6 +93,29 @@ func (sl *Skiplist) Insert(search Key, data Value) {
     }
 }
 
+func (sl *Skiplist) Delete(search Key) {
+    x := &sl.header
+    preds := make([]*Node, sl.height + 1)
+    for i := sl.height; i >= 0; i -= 1 {
+        for x.forward[i] != nil && sl.cmp(x.forward[i].key, search) < 0 {
+            x = x.forward[i]
+        }
+        preds[i] = x
+    }
+    x = x.forward[0]
+    if x != nil && sl.cmp(x.key, search) == 0 {
+        for i := 0; i < sl.height; i += 1 {
+            if preds[i].forward[i] != x {
+                break
+            }
+            preds[i].forward[i] = x.forward[i]
+        }
+        if sl.header.forward[sl.height] == nil {
+            sl.height -= 1
+        }
+    }
+}
+
 func (sl *Skiplist) String() string {
     var buf bytes.Buffer
     buf.WriteString(fmt.Sprintf("Skiplist(height: %d)\n", sl.height))
